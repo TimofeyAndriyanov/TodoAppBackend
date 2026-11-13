@@ -1,6 +1,6 @@
 services:
   todoapp-postgres:
-    image: postgres:18.1-alpine
+    image: postgres:18.7-alpine
     container_name: todoapp-env-postgres
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
@@ -9,12 +9,15 @@ services:
     volumes:
       - ${PROJECT_ROOT}/out/pgdata:/var/lib/postgresql
     restart: always
-  
+
   port-forwarder:
     image: alpine/socat:1.8.0.3
     container_name: todoapp-env-port-forwarder
     command: tcp-listen:${POSTGRES_PORT},fork,reuseaddr tcp-connect:todoapp-postgres:${POSTGRES_PORT}
     ports:
       - "127.0.0.1:${POSTGRES_PORT}:${POSTGRES_PORT}"
-  
-  
+
+  todoapp-postgres-migrate:
+    image: migrate/migrate:v4.20.1
+    volumes:
+      - ${PROJECT_ROOT}/migrations:/migrations
